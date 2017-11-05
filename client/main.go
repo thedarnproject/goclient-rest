@@ -1,25 +1,30 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
-
 	"bytes"
-
 	"encoding/json"
 	"io/ioutil"
+	"net/http"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/thedarnproject/goclient-rest/util"
 	"github.com/thedarnproject/thedarnapi/api"
+	"net/url"
+	"os"
 )
 
 func main() {
 
-	darnRestEndpoint := util.GetEnvVarOrDefault("DARN_REST_ENDPOINT", "http://localhost")
+	darnRESTURL := util.GetEnvVarOrDefault("DARN_REST_URL", "http://localhost")
+	darnRESTPath := util.GetEnvVarOrDefault("DARN_REST_PATH", "/")
 	darnPlugin := util.GetEnvVarOrDefault("DARN_PLUGIN", "bash")
 	darnTrigger := util.GetEnvVarOrDefault("DARN_TRIGGER", "trap")
 	darnError := util.GetEnvVarOrDefault("DARN_ERROR", "")
 	darnPlatorm := util.GetEnvVarOrDefault("DARN_PLATFORM", "linux")
+
+	if len(darnError) == 0 {
+		os.Exit(1)
+	}
 
 	darnAPIValues := darn.Data{
 		Plugin:   darnPlugin,
@@ -28,11 +33,18 @@ func main() {
 		Platform: darnPlatorm,
 	}
 
+	u, err := url.ParseRequestURI(darnRESTURL)
+	if err != nil {
+		panic(err)
+	}
+	u.Path = darnRESTPath
+	darnRESTEndpoint := u.String()
+
 	darnRequestJSON := new(bytes.Buffer)
 	json.NewEncoder(darnRequestJSON).Encode(darnAPIValues)
 
 	hClient := &http.Client{}
-	req, err := http.NewRequest("POST", darnRestEndpoint, darnRequestJSON)
+	req, err := http.NewRequest("POST", darnRESTEndpoint, darnRequestJSON)
 	if err != nil {
 		panic(err)
 	}
@@ -49,5 +61,5 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Println(string(responseBody))
+	logrus.Info(string(responseBody))
 }
