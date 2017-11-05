@@ -1,0 +1,8 @@
+package: github.com/thedarnproject/goclient-rest
+import:
+- package: github.com/thedarnproject/thedarnapi
+  subpackages:
+  - api
+- package: github.com/Sirupsen/logrus
+  version: v1.0.3
+
