@@ -6,12 +6,17 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/Sirupsen/logrus"
-	"github.com/thedarnproject/goclient-rest/util"
-	"github.com/thedarnproject/thedarnapi/api"
+	"fmt"
 	"net/url"
 	"os"
+
+	"github.com/thedarnproject/goclient-rest/util"
+	"github.com/thedarnproject/thedarnapi/api"
 )
+
+type fix struct {
+	Fix string
+}
 
 func main() {
 
@@ -61,5 +66,8 @@ func main() {
 		panic(err)
 	}
 
-	logrus.Info(string(responseBody))
+	gotFix := fix{}
+	json.Unmarshal(responseBody, &gotFix)
+
+	fmt.Println(gotFix)
 }
